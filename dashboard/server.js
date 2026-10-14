@@ -15,41 +15,68 @@ function createDashboardApp(client) {
   app.use(express.static(path.join(__dirname, 'public')));
 
   // 1. حالة البوت والإحصائيات
-  app.get('/api/status', (req, res) => {
+  app.get('/api/status', async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     const config = getConfig();
     let openTickets = 0;
 
-    client.guilds.cache.forEach((g) => {
-      g.channels.cache.forEach((ch) => {
+    const targetGuildId = process.env.GUILD_ID || config.guildId;
+    let primaryGuild = null;
+    if (client.isReady()) {
+      if (targetGuildId) {
+        primaryGuild = client.guilds.cache.get(targetGuildId) || (await client.guilds.fetch(targetGuildId).catch(() => null));
+      }
+      if (!primaryGuild) {
+        primaryGuild = client.guilds.cache.first() || (await client.guilds.fetch().catch(() => null))?.first();
+      }
+    }
+
+    if (primaryGuild) {
+      primaryGuild.channels.cache.forEach((ch) => {
         if (ch.topic && ch.topic.includes('status:open')) {
           openTickets++;
         }
       });
-    });
-
-    const primaryGuild = client.guilds.cache.first();
+    }
 
     res.json({
       online: client.isReady(),
       botTag: client.user ? client.user.tag : 'Nazem Ticket',
       botAvatar: client.user ? client.user.displayAvatarURL() : '',
       guildsCount: client.guilds.cache.size,
-      membersCount: client.guilds.cache.reduce((acc, g) => acc + (g.memberCount || 0), 0),
-      ping: Math.round(client.ws?.ping || 0),
+      membersCount: client.guilds.cache.reduce((acc, g) => acc + (g.memberCount || 0), 0) || (primaryGuild?.memberCount || 0),
+      ping: Math.max(0, Math.round(client.ws?.ping || 0)),
       uptime: client.uptime || 0,
       totalTicketsCount: config.ticketCounter || 0,
       openTicketsCount: openTickets,
-      guildName: primaryGuild ? primaryGuild.name : 'لا يوجد سيرفر',
+      guildName: primaryGuild ? primaryGuild.name : (client.isReady() ? 'السيرفر متصل' : 'جاري مزامنة السيرفر...'),
       guildIcon: primaryGuild ? primaryGuild.iconURL() : ''
     });
   });
 
   // 2. جلب بيانات السيرفر (الرتب والقنوات لاختيارها بالقوائم)
-  app.get('/api/guild-data', (req, res) => {
-    const guild = client.guilds.cache.first();
+  app.get('/api/guild-data', async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    const config = getConfig();
+    const targetGuildId = process.env.GUILD_ID || config.guildId;
+    let guild = null;
+    if (client.isReady()) {
+      if (targetGuildId) {
+        guild = client.guilds.cache.get(targetGuildId) || (await client.guilds.fetch(targetGuildId).catch(() => null));
+      }
+      if (!guild) {
+        guild = client.guilds.cache.first() || (await client.guilds.fetch().catch(() => null))?.first();
+      }
+    }
+
     if (!guild) {
       return res.json({ roles: [], textChannels: [], categories: [] });
     }
+
+    try {
+      if (guild.roles.cache.size <= 1) await guild.roles.fetch();
+      if (guild.channels.cache.size === 0) await guild.channels.fetch();
+    } catch {}
 
     const roles = guild.roles.cache
       .filter((r) => r.name !== '@everyone')

@@ -451,9 +451,15 @@
         populateDropdowns();
         renderCategories();
         loadConfigToUI();
+
+        // إذا كان البوت لا يزال في مرحلة الاتصال الأولية، يعيد المحاولة تلقائياً بعد 3 ثوانٍ
+        if (!resGuild.guildId || resStatus.guildName.includes('جاري') || resStatus.guildName === 'لا يوجد سيرفر') {
+          setTimeout(initDashboard, 3000);
+        }
       } catch (err) {
         console.error('Init error:', err);
         showToast('تعذر جلب البيانات من الخادم', true);
+        setTimeout(initDashboard, 4000);
       }
     }
 
