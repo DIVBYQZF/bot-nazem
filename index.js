@@ -134,10 +134,18 @@ process.on('uncaughtException', (err) => {
 // تشغيل موقع لوحة التحكم فوراً لضمان جاهزية الاستضافة السحابية
 startDashboard(client);
 
-const token = process.env.DISCORD_TOKEN;
-if (!token) {
-  console.warn('⚠️ تنبيه: لم يتم تعيين DISCORD_TOKEN في ملف .env!');
-  console.warn('👉 يرجى فتح ملف .env وإضافة التوكن ومعرف التطبيق ثم تشغيل البوت مجدداً.');
+const cleanToken = (process.env.DISCORD_TOKEN || '').trim().replace(/["']/g, '');
+
+if (!cleanToken) {
+  console.warn('⚠️ تنبيه: لم يتم تعيين DISCORD_TOKEN في متغيرات البيئة!');
+  console.warn('👉 يرجى فتح تبويب Environment في Render والتأكد من إضافة DISCORD_TOKEN.');
 } else {
-  client.login(token);
+  console.log(`⏳ جاري تسجيل الدخول إلى ديسكورد بالتوكن (طول التوكن: ${cleanToken.length} حرف)...`);
+  client.login(cleanToken)
+    .then(() => {
+      console.log('✅ تم إرسال طلب تسجيل الدخول بنجاح إلى ديسكورد!');
+    })
+    .catch((err) => {
+      console.error('❌ خطأ في تسجيل دخول البوت:', err.message || err);
+    });
 }
