@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم بوت ناظم | Nazem Ticket Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#5865F2',
+              600: '#4752C4',
+              700: '#3c45a5',
+            },
+            dark: {
+              bg: '#0B0E14',
+              surface: '#151922',
+              card: '#1C212D',
+              border: '#282E3E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #151922;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #282E3E;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #5865F2;
+    }
+    .tab-btn.active {
+      background-color: #5865F2;
+      color: white;
+      box-shadow: 0 4px 14px 0 rgba(88, 101, 242, 0.39);
+    }
+  </style>
+</head>
+<body class="bg-dark-bg text-slate-100 min-h-screen flex flex-col custom-scrollbar">
+
+  <!-- Top Navbar -->
+  <header class="bg-dark-surface border-b border-dark-border sticky top-0 z-40 backdrop-blur-md bg-opacity-90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <img id="botAvatar" src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="Bot Avatar" class="w-11 h-11 rounded-2xl border-2 border-brand-500 shadow-lg object-cover">
+          <span id="botStatusDot" class="absolute -bottom-1 -left-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-dark-surface rounded-full animate-pulse"></span>
+        </div>
+        <div>
+          <h1 id="botTag" class="font-extrabold text-lg text-white tracking-wide">ناظم تكت • Nazem Bot</h1>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span id="botServerName" class="text-brand-500 font-semibold">جاري الاتصال...</span>
+            <span>•</span>
+            <span id="botPingBadge">بنج: -- ms</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="saveAllSettings()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition-all active:scale-95 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          <span>حفظ التعديلات</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col md:flex-row gap-6">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 shrink-0 space-y-2">
+      <div class="bg-dark-surface p-3 rounded-2xl border border-dark-border space-y-1">
+        <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-dark-card transition-all font-semibold text-right">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <span>نظرة عامة وإحصائيات</span>
+        </button>
+
+        <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-dark-card transition-all font-semibold text-right">
+          <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+          <span>أقسام التكت والرتب</span>
+        </button>
+
+        <button onclick="switchTab('naming')" id="tab-naming" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-dark-card transition-all font-semibold text-right">
+          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+          <span>أرقام وتسمية التكت</span>
+        </button>
+
+        <button onclick="switchTab('channels')" id="tab-channels" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-dark-card transition-all font-semibold text-right">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          <span>الرومات واللوقات</span>
+        </button>
+
+        <button onclick="switchTab('colors')" id="tab-colors" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-dark-card transition-all font-semibold text-right">
+          <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4 5 5 0 014-4h4a4 4 0 014 4 5 5 0 01-4 4H7zm0 0l-3 3m13-17a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          <span>الألوان والمظهر</span>
+        </button>
+      </div>
+
+      <!-- Quick Server Info Box -->
+      <div class="bg-dark-surface p-4 rounded-2xl border border-dark-border text-xs text-slate-400 space-y-2">
+        <div class="font-bold text-slate-300 text-sm flex items-center justify-between">
+          <span>معلومات السيرفر</span>
+          <span id="guildMemberBadge" class="bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded-md font-mono">0 عضو</span>
+        </div>
+        <p id="guildIdDisplay" class="font-mono text-slate-500">ID: --</p>
+      </div>
+    </aside>
+
+    <!-- Content Sections -->
+    <div class="flex-1 space-y-6">
+
+      <!-- TAB 1: OVERVIEW -->
+      <section id="content-overview" class="tab-content space-y-6">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">حالة البوت</p>
+              <h3 id="statOnline" class="text-xl font-black text-emerald-400 mt-1">متصل 🟢</h3>
+            </div>
+            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+          </div>
+
+          <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">التذاكر المفتوحة حالياً</p>
+              <h3 id="statOpenTickets" class="text-2xl font-black text-amber-400 mt-1">0</h3>
+            </div>
+            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+            </div>
+          </div>
+
+          <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">إجمالي التذاكر (العداد)</p>
+              <h3 id="statTotalTickets" class="text-2xl font-black text-brand-500 mt-1">#0000</h3>
+            </div>
+            <div class="p-3 bg-brand-500/10 text-brand-500 rounded-xl">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+            </div>
+          </div>
+
+          <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">سرعة الاستجابة (Ping)</p>
+              <h3 id="statPing" class="text-2xl font-black text-cyan-400 mt-1">-- ms</h3>
+            </div>
+            <div class="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action 1: Send Ticket Panel -->
+        <div class="bg-dark-surface p-6 rounded-2xl border border-dark-border space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-lg">🚀</div>
+            <div>
+              <h2 class="text-lg font-bold text-white">إرسال لوحة التذاكر إلى السيرفر</h2>
+              <p class="text-xs text-slate-400">اختر الروم التي ترغب بنشر لوحة فتح التذاكر فيها بضغطة زر واحدة.</p>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 items-center">
+            <select id="selectPanelChannel" class="w-full sm:flex-1 bg-dark-card border border-dark-border text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+              <option value="">-- اختر القناة المراد إرسال اللوحة فيها --</option>
+            </select>
+            <button onclick="sendTicketPanel()" class="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-95 cursor-pointer">
+              إرسال اللوحة الآن
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Action 2: Test Logs -->
+        <div class="bg-dark-surface p-6 rounded-2xl border border-dark-border flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-lg">🔔</div>
+            <div>
+              <h2 class="text-base font-bold text-white">فحص وتجربة روم اللوقات (Logs)</h2>
+              <p class="text-xs text-slate-400">إرسال إشعار فحص فوري إلى روم سجلات الإدارة للتأكد من وصول اللوقات بنجاح.</p>
+            </div>
+          </div>
+          <button onclick="testLog()" class="w-full sm:w-auto bg-dark-card hover:bg-dark-border border border-dark-border text-slate-200 font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+            إرسال إشعار فحص
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 2: TICKET CATEGORIES & SPECIFIC ROLES -->
+      <section id="content-categories" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white">أقسام التذاكر والرتب المخصصة لكل خيار</h2>
+            <p class="text-xs text-slate-400">يمكنك تحديد رتبة إدارية مخصصة ومستقلة لكل قسم (مثل رتبة للشكاوى ورتبة لتقديم الإدارة ورتبة للاستفسارات).</p>
+          </div>
+          <button onclick="addNewCategoryModal()" class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20 cursor-pointer">
+            <span>+ إضافة قسم جديد</span>
+          </button>
+        </div>
+
+        <div id="categoriesList" class="space-y-4">
+          <!-- Dynamic category cards inserted here -->
+        </div>
+      </section>
+
+      <!-- TAB 3: NAMING & NUMBERS -->
+      <section id="content-naming" class="tab-content hidden space-y-6">
+        <div class="bg-dark-surface p-6 rounded-2xl border border-dark-border space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">أرقام وتسمية قنوات التذاكر</h2>
+            <p class="text-xs text-slate-400">تخصيص شكل اسم القناة عند إنشائها بحيث تكون بالأرقام المتسلسلة بدلاً من أسماء الأعضاء.</p>
+          </div>
+
+          <div class="space-y-4">
+            <label class="block text-sm font-bold text-slate-300">طريقة التسمية (Naming Format):</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label class="cursor-pointer bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col gap-2 hover:border-brand-500 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white">بادئة القسم + أرقام</span>
+                  <input type="radio" name="namingFormat" value="prefix-number" class="text-brand-500">
+                </div>
+                <span class="text-xs text-slate-400">مثال: <code class="text-brand-400 bg-black/40 px-2 py-0.5 rounded">شكوى-0001</code> أو <code class="text-brand-400 bg-black/40 px-2 py-0.5 rounded">استفسار-0001</code></span>
+              </label>
+
+              <label class="cursor-pointer bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col gap-2 hover:border-brand-500 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white">كلمة تكت + أرقام</span>
+                  <input type="radio" name="namingFormat" value="ticket-number" class="text-brand-500">
+                </div>
+                <span class="text-xs text-slate-400">مثال: <code class="text-brand-400 bg-black/40 px-2 py-0.5 rounded">ticket-0001</code></span>
+              </label>
+
+              <label class="cursor-pointer bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col gap-2 hover:border-brand-500 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white">أرقام فقط (Numbers Only)</span>
+                  <input type="radio" name="namingFormat" value="number-only" class="text-brand-500">
+                </div>
+                <span class="text-xs text-slate-400">مثال: <code class="text-brand-400 bg-black/40 px-2 py-0.5 rounded">0001</code></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-dark-border space-y-3">
+            <label class="block text-sm font-bold text-slate-300">العداد الحالي للتذاكر (رقم التذكرة القادمة):</label>
+            <div class="flex items-center gap-3 max-w-xs">
+              <input type="number" id="inputTicketCounter" min="0" class="w-full bg-dark-card border border-dark-border text-white text-base font-bold rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand-500">
+              <button onclick="resetCounter(0)" class="bg-dark-card hover:bg-dark-border text-slate-400 hover:text-white px-3 py-2.5 rounded-xl border border-dark-border text-xs whitespace-nowrap cursor-pointer">
+                تصفير للصفر
+              </button>
+            </div>
+            <p class="text-xs text-slate-500">إذا كان العداد 0، التذكرة التالية ستكون <code>0001</code>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CHANNELS & ROLES -->
+      <section id="content-channels" class="tab-content hidden space-y-6">
+        <div class="bg-dark-surface p-6 rounded-2xl border border-dark-border space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">الرتب والقنوات الأساسية</h2>
+            <p class="text-xs text-slate-400">حدد الرتبة الافتراضية والتصنيف وروم اللوقات الخاص بالسجلات.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Support Role -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-slate-300">👥 رتبة الدعم الفني العامة (Default Support Role):</label>
+              <select id="selectSupportRole" class="w-full bg-dark-card border border-dark-border text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+                <option value="">-- اختر رتبة الدعم --</option>
+              </select>
+              <p class="text-xs text-slate-500">تستطيع رؤية واستلام جميع التذاكر بشكل افتراضي.</p>
+            </div>
+
+            <!-- Category -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-slate-300">📂 تصنيف التذاكر (Category):</label>
+              <select id="selectCategory" class="w-full bg-dark-card border border-dark-border text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+                <option value="">-- تلقائي (إنشاء تصنيف 🎫・التذاكر) --</option>
+              </select>
+              <p class="text-xs text-slate-500">التصنيف الذي تُنشأ تحته قنوات التذاكر.</p>
+            </div>
+
+            <!-- Logs Channel -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-slate-300">🔒 روم لوقات وسجلات التذاكر (Logs Channel):</label>
+              <select id="selectLogsChannel" class="w-full bg-dark-card border border-dark-border text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+                <option value="">-- اختر روم اللوقات للإدارة --</option>
+              </select>
+              <p class="text-xs text-slate-500">تصل إليها ملفات الـ Transcripts وجميع أحداث الفتح والإغلاق.</p>
+            </div>
+
+            <!-- Max Tickets Per User -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-slate-300">🛡️ أقصى عدد تذاكر مفتوحة للعضو الواحد:</label>
+              <input type="number" id="inputMaxTickets" min="1" max="10" class="w-full bg-dark-card border border-dark-border text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+              <p class="text-xs text-slate-500">الافتراضي: 1 (لمنع فتح أكثر من تذكرة في نفس الوقت).</p>
+            </div>
+
+            <!-- Close Countdown Seconds -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-slate-300">⏱️ ثواني العد التنازلي قبل حذف القناة بعد الإغلاق:</label>
+              <input type="number" id="inputCloseSeconds" min="1" max="60" class="w-full bg-dark-card border border-dark-border text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+              <p class="text-xs text-slate-500">الافتراضي: 5 ثوانٍ.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: COLORS & APPEARANCE -->
+      <section id="content-colors" class="tab-content hidden space-y-6">
+        <div class="bg-dark-surface p-6 rounded-2xl border border-dark-border space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">تخصيص ألوان رسائل البوت (Embed Colors)</h2>
+            <p class="text-xs text-slate-400">تعديل ألوان الخط الجانبي للرسائل حسب هوية سيرفرك.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-dark-card p-4 rounded-xl border border-dark-border space-y-2">
+              <label class="block text-xs font-bold text-slate-300">اللون الأساسي (Primary):</label>
+              <div class="flex items-center gap-3">
+                <input type="color" id="colorPickerPrimary" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0">
+                <input type="text" id="colorHexPrimary" class="w-full bg-dark-bg border border-dark-border text-xs font-mono rounded-lg px-2 py-2 text-white">
+              </div>
+            </div>
+
+            <div class="bg-dark-card p-4 rounded-xl border border-dark-border space-y-2">
+              <label class="block text-xs font-bold text-slate-300">لون النجاح (Success):</label>
+              <div class="flex items-center gap-3">
+                <input type="color" id="colorPickerSuccess" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0">
+                <input type="text" id="colorHexSuccess" class="w-full bg-dark-bg border border-dark-border text-xs font-mono rounded-lg px-2 py-2 text-white">
+              </div>
+            </div>
+
+            <div class="bg-dark-card p-4 rounded-xl border border-dark-border space-y-2">
+              <label class="block text-xs font-bold text-slate-300">لون الخطر / الحذف (Danger):</label>
+              <div class="flex items-center gap-3">
+                <input type="color" id="colorPickerDanger" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0">
+                <input type="text" id="colorHexDanger" class="w-full bg-dark-bg border border-dark-border text-xs font-mono rounded-lg px-2 py-2 text-white">
+              </div>
+            </div>
+
+            <div class="bg-dark-card p-4 rounded-xl border border-dark-border space-y-2">
+              <label class="block text-xs font-bold text-slate-300">لون التحذير (Warning):</label>
+              <div class="flex items-center gap-3">
+                <input type="color" id="colorPickerWarning" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0">
+                <input type="text" id="colorHexWarning" class="w-full bg-dark-bg border border-dark-border text-xs font-mono rounded-lg px-2 py-2 text-white">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-6 left-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-none">
+    <span id="toastIcon">✅</span>
+    <span id="toastMsg" class="font-bold text-sm">تم الحفظ بنجاح!</span>
+  </div>
+
+  <script>
+    let globalConfig = {};
+    let guildData = { roles: [], textChannels: [], categories: [] };
+
+    // تبديل التبويبات
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+      const btn = document.getElementById(`tab-${tabId}`);
+      const content = document.getElementById(`content-${tabId}`);
+      if (btn && content) {
+        btn.classList.add('active');
+        content.classList.remove('hidden');
+      }
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toastMsg');
+      const icon = document.getElementById('toastIcon');
+
+      msg.innerText = message;
+      if (isError) {
+        toast.className = toast.className.replace('bg-emerald-600', 'bg-red-600');
+        icon.innerText = '❌';
+      } else {
+        toast.className = toast.className.replace('bg-red-600', 'bg-emerald-600');
+        icon.innerText = '✅';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    // جلب البيانات عند بدء التشغيل
+    async function initDashboard() {
+      try {
+        const [resStatus, resGuild, resConfig] = await Promise.all([
+          fetch('/api/status').then(r => r.json()),
+          fetch('/api/guild-data').then(r => r.json()),
+          fetch('/api/config').then(r => r.json())
+        ]);
+
+        // تحديث معلومات البوت
+        if (resStatus.botAvatar) document.getElementById('botAvatar').src = resStatus.botAvatar;
+        if (resStatus.botTag) document.getElementById('botTag').innerText = resStatus.botTag;
+        document.getElementById('botServerName').innerText = resStatus.guildName || 'متصل بالسيرفر';
+        document.getElementById('botPingBadge').innerText = `بنج: ${resStatus.ping} ms`;
+        document.getElementById('statPing').innerText = `${resStatus.ping} ms`;
+        document.getElementById('statOpenTickets').innerText = resStatus.openTicketsCount;
+        document.getElementById('statTotalTickets').innerText = `#${String(resStatus.totalTicketsCount || 0).padStart(4, '0')}`;
+        document.getElementById('guildMemberBadge').innerText = `${resStatus.membersCount} عضو`;
+        document.getElementById('guildIdDisplay').innerText = `ID: ${resGuild.guildId || '--'}`;
+
+        guildData = resGuild;
+        globalConfig = resConfig;
+
+        populateDropdowns();
+        renderCategories();
+        loadConfigToUI();
+      } catch (err) {
+        console.error('Init error:', err);
+        showToast('تعذر جلب البيانات من الخادم', true);
+      }
+    }
+
+    function populateDropdowns() {
+      // 1. القنوات النصية
+      const panelSelect = document.getElementById('selectPanelChannel');
+      const logsSelect = document.getElementById('selectLogsChannel');
+
+      panelSelect.innerHTML = '<option value="">-- اختر القناة المراد إرسال اللوحة فيها --</option>';
+      logsSelect.innerHTML = '<option value="">-- اختر روم اللوقات للإدارة --</option>';
+
+      guildData.textChannels.forEach(ch => {
+        panelSelect.innerHTML += `<option value="${ch.id}">#${ch.name}</option>`;
+        logsSelect.innerHTML += `<option value="${ch.id}">#${ch.name}</option>`;
+      });
+
+      // 2. التصنيفات
+      const catSelect = document.getElementById('selectCategory');
+      catSelect.innerHTML = '<option value="">-- تلقائي (إنشاء تصنيف 🎫・التذاكر) --</option>';
+      guildData.categories.forEach(cat => {
+        catSelect.innerHTML += `<option value="${cat.id}">📁 ${cat.name}</option>`;
+      });
+
+      // 3. الرتب
+      const roleSelect = document.getElementById('selectSupportRole');
+      roleSelect.innerHTML = '<option value="">-- اختر رتبة الدعم الافتراضية --</option>';
+      guildData.roles.forEach(role => {
+        roleSelect.innerHTML += `<option value="${role.id}">${role.name}</option>`;
+      });
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('categoriesList');
+      container.innerHTML = '';
+
+      const types = globalConfig.ticketTypes || [];
+      types.forEach((t, index) => {
+        let roleOptions = `<option value="">-- استخدام الرتبة الافتراضية العامة --</option>`;
+        guildData.roles.forEach(r => {
+          const selected = t.roleId === r.id ? 'selected' : '';
+          roleOptions += `<option value="${r.id}" ${selected}>${r.name}</option>`;
+        });
+
+        const card = document.createElement('div');
+        card.className = 'bg-dark-surface p-5 rounded-2xl border border-dark-border space-y-4';
+        card.innerHTML = `
+          <div class="flex items-center justify-between pb-3 border-b border-dark-border">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">${t.emoji || '🎫'}</span>
+              <div>
+                <h3 class="font-bold text-white text-base">${t.label}</h3>
+                <span class="text-xs text-brand-400 font-mono">ID: ${t.id}</span>
+              </div>
+            </div>
+            <button onclick="deleteCategory(${index})" class="text-xs bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+              حذف القسم
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-400 mb-1">اسم القسم:</label>
+              <input type="text" value="${t.label}" onchange="updateCatField(${index}, 'label', this.value)" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-white">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-400 mb-1">الإيموجي:</label>
+              <input type="text" value="${t.emoji || '🎫'}" onchange="updateCatField(${index}, 'emoji', this.value)" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-white">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-400 mb-1">بادئة الروم (Prefix):</label>
+              <input type="text" value="${t.channelPrefix || 'تكت'}" onchange="updateCatField(${index}, 'channelPrefix', this.value)" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-white">
+            </div>
+
+            <div>
+              <label class="block font-bold text-amber-400 mb-1">🎯 الرتبة المسؤولة عن هذا الخيار:</label>
+              <select onchange="updateCatField(${index}, 'roleId', this.value)" class="w-full bg-dark-card border border-amber-500/40 rounded-xl px-3 py-2 text-amber-300 font-medium">
+                ${roleOptions}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-400 mb-1 text-xs">الوصف المختصر:</label>
+            <input type="text" value="${t.description || ''}" onchange="updateCatField(${index}, 'description', this.value)" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-white text-xs">
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateCatField(index, field, value) {
+      if (globalConfig.ticketTypes && globalConfig.ticketTypes[index]) {
+        globalConfig.ticketTypes[index][field] = value;
+      }
+    }
+
+    function deleteCategory(index) {
+      if (confirm('هل أنت متأكد من حذف هذا القسم؟')) {
+        globalConfig.ticketTypes.splice(index, 1);
+        renderCategories();
+      }
+    }
+
+    function addNewCategoryModal() {
+      const newId = 'cat_' + Date.now().toString(36);
+      const newCat = {
+        id: newId,
+        label: 'قسم جديد',
+        description: 'وصف مختصر للقسم',
+        emoji: '📌',
+        channelPrefix: 'تكت',
+        roleId: ''
+      };
+      if (!globalConfig.ticketTypes) globalConfig.ticketTypes = [];
+      globalConfig.ticketTypes.push(newCat);
+      renderCategories();
+      showToast('تمت إضافة القسم، يرجى ملء بياناته والضغط على حفظ');
+    }
+
+    function loadConfigToUI() {
+      // 1. الرتب والقنوات
+      if (globalConfig.supportRoleId) document.getElementById('selectSupportRole').value = globalConfig.supportRoleId;
+      if (globalConfig.ticketCategoryId) document.getElementById('selectCategory').value = globalConfig.ticketCategoryId;
+      if (globalConfig.logsChannelId) document.getElementById('selectLogsChannel').value = globalConfig.logsChannelId;
+      document.getElementById('inputMaxTickets').value = globalConfig.maxTicketsPerUser || 1;
+      document.getElementById('inputCloseSeconds').value = globalConfig.closeCountdownSeconds || 5;
+
+      // 2. التسمية والأرقام
+      const format = globalConfig.namingFormat || 'prefix-number';
+      const radio = document.querySelector(`input[name="namingFormat"][value="${format}"]`);
+      if (radio) radio.checked = true;
+      document.getElementById('inputTicketCounter').value = globalConfig.ticketCounter || 0;
+
+      // 3. الألوان
+      const colors = globalConfig.colors || {};
+      syncColor('Primary', colors.primary || '#5865F2');
+      syncColor('Success', colors.success || '#57F287');
+      syncColor('Danger', colors.danger || '#ED4245');
+      syncColor('Warning', colors.warning || '#FEE75C');
+    }
+
+    function syncColor(type, hex) {
+      const picker = document.getElementById(`colorPicker${type}`);
+      const hexInput = document.getElementById(`colorHex${type}`);
+      picker.value = hex;
+      hexInput.value = hex;
+
+      picker.oninput = () => { hexInput.value = picker.value; };
+      hexInput.onchange = () => { picker.value = hexInput.value; };
+    }
+
+    function resetCounter(val) {
+      document.getElementById('inputTicketCounter').value = val;
+    }
+
+    async function saveAllSettings() {
+      // قراءة القيم من الواجهة
+      const updatedConfig = {
+        ...globalConfig,
+        supportRoleId: document.getElementById('selectSupportRole').value,
+        ticketCategoryId: document.getElementById('selectCategory').value,
+        logsChannelId: document.getElementById('selectLogsChannel').value,
+        maxTicketsPerUser: parseInt(document.getElementById('inputMaxTickets').value) || 1,
+        closeCountdownSeconds: parseInt(document.getElementById('inputCloseSeconds').value) || 5,
+        namingFormat: document.querySelector('input[name="namingFormat"]:checked')?.value || 'prefix-number',
+        ticketCounter: parseInt(document.getElementById('inputTicketCounter').value) || 0,
+        colors: {
+          primary: document.getElementById('colorHexPrimary').value,
+          success: document.getElementById('colorHexSuccess').value,
+          danger: document.getElementById('colorHexDanger').value,
+          warning: document.getElementById('colorHexWarning').value,
+          secondary: '#2B2D31'
+        }
+      };
+
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedConfig)
+        }).then(r => r.json());
+
+        if (res.success) {
+          globalConfig = updatedConfig;
+          showToast('✅ تم حفظ جميع التعديلات بنجاح!');
+        } else {
+          showToast(res.message || 'حدث خطأ أثناء الحفظ', true);
+        }
+      } catch (err) {
+        showToast('تعذر الاتصال بالخادم لحفظ الإعدادات', true);
+      }
+    }
+
+    async function sendTicketPanel() {
+      const chId = document.getElementById('selectPanelChannel').value;
+      if (!chId) {
+        return alert('يرجى اختيار القناة أولاً!');
+      }
+
+      try {
+        const res = await fetch('/api/send-panel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelId: chId })
+        }).then(r => r.json());
+
+        if (res.success) {
+          showToast(res.message);
+        } else {
+          showToast(res.message, true);
+        }
+      } catch {
+        showToast('فشل إرسال اللوحة', true);
+      }
+    }
+
+    async function testLog() {
+      try {
+        const res = await fetch('/api/test-log', {
+          method: 'POST'
+        }).then(r => r.json());
+
+        if (res.success) {
+          showToast(res.message);
+        } else {
+          showToast(res.message, true);
+        }
+      } catch {
+        showToast('فشل إرسال إشعار الفحص', true);
+      }
+    }
+
+    window.onload = initDashboard;
+  </script>
+</body>
+</html>

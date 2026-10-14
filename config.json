@@ -1,0 +1,43 @@
+{
+  "supportRoleId": "1559896545883586613",
+  "ticketCategoryId": "",
+  "logsChannelId": "1559896711063805992",
+  "maxTicketsPerUser": 1,
+  "closeCountdownSeconds": 5,
+  "ticketCounter": 3,
+  "namingFormat": "prefix-number",
+  "dashboardPort": 3000,
+  "colors": {
+    "primary": "#5865F2",
+    "success": "#57F287",
+    "danger": "#ED4245",
+    "warning": "#FEE75C",
+    "secondary": "#2B2D31"
+  },
+  "ticketTypes": [
+    {
+      "id": "inquiry",
+      "label": "استفسار",
+      "description": "للمساعدة والإجابة عن أي استفسار أو سؤال",
+      "emoji": "❓",
+      "channelPrefix": "استفسار",
+      "roleId": ""
+    },
+    {
+      "id": "complaint_member",
+      "label": "شكوى على عضو",
+      "description": "لتقديم بلاغ أو شكوى رسمية ضد عضو أو إداري",
+      "emoji": "🚨",
+      "channelPrefix": "شكوى",
+      "roleId": ""
+    },
+    {
+      "id": "staff_apply",
+      "label": "تقديم على الاداره",
+      "description": "للتقديم على رتبة في طاقم إدارة السيرفر",
+      "emoji": "💼",
+      "channelPrefix": "تقديم",
+      "roleId": ""
+    }
+  ]
+}
