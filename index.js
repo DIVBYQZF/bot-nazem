@@ -55,9 +55,6 @@ client.once(Events.ClientReady, () => {
     activities: [{ name: '🎫 نظام التذاكر | /ticket-setup', type: ActivityType.Watching }],
     status: 'online'
   });
-
-  // تشغيل لوحة التحكم (Dashboard)
-  startDashboard(client);
 });
 
 // عند انضمام البوت لسيرفر جديد
@@ -133,6 +130,9 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception thrown:', err);
 });
+
+// تشغيل موقع لوحة التحكم فوراً لضمان جاهزية الاستضافة السحابية
+startDashboard(client);
 
 const token = process.env.DISCORD_TOKEN;
 if (!token) {

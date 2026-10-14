@@ -212,10 +212,10 @@ function startDashboard(client) {
   const port = process.env.PORT || config.dashboardPort || 3000;
   const app = createDashboardApp(client);
 
-  const server = app.listen(port, () => {
+  const server = app.listen(port, '0.0.0.0', () => {
     console.log('------------------------------------');
     console.log(`🌐 موقع لوحة التحكم (Dashboard) يعمل الآن على:`);
-    console.log(`👉 http://localhost:${port}`);
+    console.log(`👉 http://0.0.0.0:${port}`);
     console.log('------------------------------------');
   });
 
