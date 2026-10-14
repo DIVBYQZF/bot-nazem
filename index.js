@@ -44,7 +44,15 @@ if (fs.existsSync(commandsPath)) {
   }
 }
 
-// حدث تسجيل الدخول
+// تشخيص ومراقبة اتصال ديسكورد
+client.on(Events.Debug, (msg) => {
+  if (msg.includes('Heartbeat') || msg.includes('heartbeat')) return;
+  console.log(`[Discord Debug] ${msg}`);
+});
+client.on(Events.Error, (err) => console.error('❌ Discord Error:', err));
+client.on(Events.Warn, (warn) => console.warn('⚠️ Discord Warn:', warn));
+client.on(Events.ShardError, (err, id) => console.error(`❌ Shard ${id} Error:`, err));
+client.on(Events.ShardDisconnect, (event, id) => console.warn(`⚠️ Shard ${id} Disconnected:`, event));
 client.once(Events.ClientReady, () => {
   console.log('====================================');
   console.log(`🤖 البوت يعمل بنجاح باسم: ${client.user.tag}`);
